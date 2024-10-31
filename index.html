@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light the Skyrocket!</title>
+    <style>
+        /* Basic page styling */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to bottom, #001D3D, #000033);
+            overflow: hidden;
+            color: white;
+            font-family: Arial, sans-serif;
+            position: relative;
+        }
+
+        /* Starry background */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 200vw;
+            height: 200vh;
+            background: url('https://www.transparenttextures.com/patterns/stardust.png') repeat;
+            opacity: 0.4;
+            animation: starsMove 30s linear infinite;
+        }
+
+        @keyframes starsMove {
+            from { transform: translate(0, 0); }
+            to { transform: translate(-100px, -100px); }
+        }
+
+        /* Rocket and spark container */
+        .container {
+            position: relative;
+            width: 100px;
+            height: 400px;
+            text-align: center;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .rocket {
+            width: 50px;
+            height: 100px;
+            background-color: red;
+            border-radius: 10px;
+            position: absolute;
+            bottom: 0;
+            transition: transform 2s ease-in-out, opacity 0.5s ease;
+            box-shadow: 0px 0px 10px 2px rgba(255, 69, 0, 0.8);
+        }
+
+        .rocket::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            width: 30px;
+            height: 20px;
+            background-color: yellow;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+
+        /* Fire animation */
+        .fire {
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, orange, red);
+            border-radius: 50%;
+            position: absolute;
+            bottom: -20px;
+            left: 15px;
+            animation: flicker 0.2s infinite alternate;
+        }
+
+        /* Flicker animation */
+        @keyframes flicker {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
+        }
+
+        /* Rocket launch trail */
+        .trail {
+            position: absolute;
+            width: 5px;
+            height: 200px;
+            background: linear-gradient(to top, orange, transparent);
+            bottom: -50px;
+            left: 22px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        /* Rocket launch animation */
+        .launched {
+            transform: translateY(-600px);
+            opacity: 0;
+        }
+
+        /* Spark explosion */
+        .explosion {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            top: 50px;
+            left: 25px;
+            width: 100px;
+            height: 100px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spark {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: orange;
+            border-radius: 50%;
+            opacity: 0;
+            animation: explodeSpark 1s ease-out forwards;
+        }
+
+        /* Explosion and spark animations */
+        @keyframes explodeSpark {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)) scale(0.5); opacity: 0; }
+        }
+
+        /* Spark trail particle */
+        .trail-spark {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background-color: gold;
+            border-radius: 50%;
+            opacity: 1;
+            animation: fadeOut 1s ease-out forwards;
+        }
+
+        /* Fading effect for trail sparks */
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(10px) scale(0.5); }
+        }
+
+        p {
+            font-size: 1.2em;
+            color: #FFD700;
+            position: relative;
+            margin-top: 160px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" onclick="launchRocket()">
+    <div class="rocket" id="rocket">
+        <div class="trail" id="trail"></div>
+        <div class="fire" id="fire"></div>
+    </div>
+    <p>Click to light the skyrocket!</p>
+    <div class="explosion" id="explosion"></div>
+</div>
+
+<script>
+    function launchRocket() {
+        const rocket = document.getElementById("rocket");
+        const fire = document.getElementById("fire");
+        const trail = document.getElementById("trail");
+        const explosion = document.getElementById("explosion");
+
+        // Add 'launched' class to animate the rocket
+        rocket.classList.add("launched");
+        trail.classList.add("trail-active");
+
+        // Hide the fire after launch
+        setTimeout(() => {
+            fire.style.display = "none";
+        }, 500);
+
+        // Generate golden spark trail
+        const trailInterval = setInterval(() => {
+            createTrailSpark(rocket);
+        }, 100);
+
+        // Stop generating trail sparks after launch
+        setTimeout(() => {
+            clearInterval(trailInterval);
+            createExplosion();
+        }, 2000);
+    }
+
+    function createTrailSpark(rocket) {
+        const trailSpark = document.createElement("div");
+        trailSpark.classList.add("trail-spark");
+
+        // Position spark at the current position of the rocket
+        const rocketRect = rocket.getBoundingClientRect();
+        trailSpark.style.left = `${rocketRect.left + rocketRect.width / 2 - 2}px`;
+        trailSpark.style.top = `${rocketRect.bottom - 10}px`;
+
+        // Append the spark to the body and remove after animation
+        document.body.appendChild(trailSpark);
+        setTimeout(() => {
+            trailSpark.remove();
+        }, 1000);
+    }
+
+    function createExplosion() {
+        const explosion = document.getElementById("explosion");
+        explosion.style.opacity = "1";
+
+        // Create multiple spark elements for explosion
+        for (let i = 0; i < 20; i++) {
+            const spark = document.createElement("div");
+            spark.classList.add("spark");
+
+            // Generate random position for each spark
+            const angle = Math.random() * 2 * Math.PI;
+            const distance = Math.random() * 100 + 50;
+            const x = Math.cos(angle) * distance + "px";
+            const y = Math.sin(angle) * distance + "px";
+            spark.style.setProperty("--x", x);
+            spark.style.setProperty("--y", y);
+
+            // Append spark to explosion container
+            explosion.appendChild(spark);
+
+            // Remove spark after animation ends
+            spark.addEventListener("animationend", () => {
+                spark.remove();
+            });
+        }
+    }
+</script>
+
+</body>
+</html>
