@@ -238,6 +238,21 @@
                 spark.remove();
             });
         }
+
+        // Hide explosion and reset rocket after animation
+        setTimeout(() => {
+            explosion.style.opacity = "0";
+            resetRocket();
+        }, 1000);
+    }
+
+    function resetRocket() {
+        const rocket = document.getElementById("rocket");
+        const fire = document.getElementById("fire");
+
+        // Reset rocket position and show fire again
+        rocket.classList.remove("launched");
+        fire.style.display = "block";
     }
 </script>
 
